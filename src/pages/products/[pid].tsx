@@ -10,7 +10,12 @@ interface ProductDetailPageProps {
   product: Product;
 }
 
-const ProductDetailPage: React.FC<InferGetStaticPropsType<typeof getStaticProps>> = ({ product}) => {
+const ProductDetailPage: React.FC<InferGetStaticPropsType<typeof getStaticProps>> = ({ product }) => {
+
+  if (!product) {
+    return <div>Loading...</div>;
+  }
+
   return (
     <div>
       <h1>{product.title}</h1>
@@ -24,8 +29,7 @@ interface Parameters extends ParsedUrlQuery {
 }
 
 export const getStaticProps: GetStaticProps<ProductDetailPageProps> = async (context) => {
-  const filePath = path.join(process.cwd(), 'src/data/dummy-backend.json');
-  const data = await fs.readFile(filePath, 'utf-8');
+  const products = await getProducts();
 
   const { params } = context;
 
@@ -37,25 +41,25 @@ export const getStaticProps: GetStaticProps<ProductDetailPageProps> = async (con
     return { notFound: true };
   }
 
-  const response = JSON.parse(data) as any;
-  const product = response.products.find((p: Product) => p.id === +productId);
+  const product = products.find(p => p.id === +productId);
+
+  if (product == undefined) {
+    return { notFound: true };
+  }
 
   return {
     props: {
-      product: product
+      product: product,
     },
   }
 }
 
 export const getStaticPaths: GetStaticPaths = async () => {
-  const filePath = path.join(process.cwd(), 'src/data/dummy-backend.json');
-  const data = await fs.readFile(filePath, 'utf-8');
-  const response = JSON.parse(data) as any;
-  const product: Product[] = response.products;
+  const products = await getProducts();
 
-  // const paths = product.map(p => `/products/${p.id}`);
+  // const paths = products.map(p => `/products/${p.id}`);
 
-  const paths: GetStaticPathsResult<Parameters>['paths'] = product.map(p => {
+  const paths: GetStaticPathsResult<Parameters>['paths'] = products.filter(p => p.id !== 3).map(p => {
     return {
       params: {
         pid: p.id.toString()
@@ -65,8 +69,16 @@ export const getStaticPaths: GetStaticPaths = async () => {
 
   return {
     paths: paths,
-    fallback: false
+    fallback: true
   }
+}
+
+
+async function getProducts() {
+  const filePath = path.join(process.cwd(), 'src/data/dummy-backend.json');
+  const data = await fs.readFile(filePath, 'utf-8');
+  const response: { products: Product[] } = JSON.parse(data);
+  return response.products;
 }
 
 export default ProductDetailPage;
