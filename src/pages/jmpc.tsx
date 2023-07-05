@@ -23,7 +23,7 @@ const Jmpc: React.FC<InferGetStaticPropsType<typeof getStaticProps>> = (props) =
   );
 };
 
-export const getStaticProps: GetStaticProps<JmpcProps> = async () => {
+export const getStaticProps: GetStaticProps<JmpcProps> = async (context) => {
   console.log('jmpc (Re-)Generating...');
   const filePath = path.join(process.cwd(), 'src/data/dummy-backend.json');
   const data = await fs.readFile(filePath, 'utf-8');
@@ -31,7 +31,9 @@ export const getStaticProps: GetStaticProps<JmpcProps> = async () => {
 
   return {
     props: response,
-    revalidate: 10
+    revalidate: 10,
+    notFound: false,
+    redirect: undefined
   }
 }
 
