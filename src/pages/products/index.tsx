@@ -2,22 +2,20 @@ import React from "react";
 import * as fs from "fs/promises";
 import path from "path";
 import { GetStaticProps, InferGetStaticPropsType } from "next";
-
-
-interface Product {
-  id: number;
-  title: string;
-}
+import { Product } from "@/models";
+import Link from "next/link";
 
 interface JmpcProps {
   products: Product[];
 }
 
-const Jmpc: React.FC<InferGetStaticPropsType<typeof getStaticProps>> = (props) => {
+const ProductPage: React.FC<InferGetStaticPropsType<typeof getStaticProps>> = (props) => {
   return (
     <div className="jmpc">
       <ul>
-        {props.products.map(p => <li key={p.id}>{p.title}</li>)}
+        {props.products.map(p => <li key={p.id}>
+          <Link href={`/products/${p.id}`}>{p.title}</Link>
+        </li>)}
       </ul>
     </div>
   );
@@ -37,4 +35,4 @@ export const getStaticProps: GetStaticProps<JmpcProps> = async (context) => {
   }
 }
 
-export default Jmpc;
+export default ProductPage;
