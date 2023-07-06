@@ -1,5 +1,5 @@
 import React from "react";
-import { GetStaticPaths, GetStaticProps, InferGetStaticPropsType } from "next";
+import { GetStaticPaths, GetStaticProps, InferGetStaticPropsType, NextPage } from "next";
 import path from "path";
 import fs from "fs/promises";
 import { Product } from "@/models";
@@ -10,7 +10,7 @@ interface ProductDetailPageProps {
   product: Product;
 }
 
-const ProductDetailPage: React.FC<InferGetStaticPropsType<typeof getStaticProps>> = ({ product }) => {
+const ProductDetailPage: NextPage<InferGetStaticPropsType<typeof getStaticProps>> = ({ product }) => {
 
   if (!product) {
     return <div>Loading...</div>;
