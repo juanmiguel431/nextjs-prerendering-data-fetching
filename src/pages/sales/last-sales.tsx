@@ -1,5 +1,6 @@
 import { NextPage } from "next";
 import { useEffect, useState } from "react";
+import useSWR from "swr";
 
 interface sales {
   id: string;
@@ -9,25 +10,42 @@ interface sales {
 
 const LastSalesPage: NextPage = () => {
   const [sales, setSales] = useState<sales[]>([])
-  const [loading, setLoading] = useState(false);
+  // const [loading, setLoading] = useState(false);
+
+  const { data, error } = useSWR('https://next-js-course-53344-default-rtdb.firebaseio.com/sales.json', url => fetch(url).then(res => res.json()));
 
   useEffect(() => {
-    setLoading(true);
-    fetch('https://next-js-course-53344-default-rtdb.firebaseio.com/sales.json')
-      .then(value => value.json())
-      .then(data => {
+    if (!data) return;
 
-        const sales: sales[] = [];
-        for (const key in data) {
-          sales.push({ id: key, ...data[key] })
-        }
+    const sales: sales[] = [];
+    for (const key in data) {
+      sales.push({ id: key, ...data[key] })
+    }
 
-        setSales(sales);
-        setLoading(false);
-      });
-  }, []);
+    setSales(sales);
+  }, [data]);
 
-  if (loading) {
+  // useEffect(() => {
+  //   setLoading(true);
+  //   fetch('https://next-js-course-53344-default-rtdb.firebaseio.com/sales.json')
+  //     .then(value => value.json())
+  //     .then(data => {
+  //
+  //       const sales: sales[] = [];
+  //       for (const key in data) {
+  //         sales.push({ id: key, ...data[key] })
+  //       }
+  //
+  //       setSales(sales);
+  //       setLoading(false);
+  //     });
+  // }, []);
+
+  if (error) {
+    return <p>Failed to load.</p>;
+  }
+
+  if (!data || !sales) {
     return <p>Loading...</p>;
   }
 
