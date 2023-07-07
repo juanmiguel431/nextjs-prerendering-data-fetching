@@ -1,15 +1,19 @@
-import { NextPage } from "next";
+import { GetStaticProps, NextPage } from "next";
 import { useEffect, useState } from "react";
 import useSWR from "swr";
 
-interface sales {
+interface Sale {
   id: string;
   username: string;
   volume: number
 }
 
-const LastSalesPage: NextPage = () => {
-  const [sales, setSales] = useState<sales[]>([])
+interface LastSalesPageProps {
+  sales: Sale[];
+}
+
+const LastSalesPage: NextPage<LastSalesPageProps> = (props) => {
+  const [sales, setSales] = useState<Sale[]>(props.sales)
   // const [loading, setLoading] = useState(false);
 
   const { data, error } = useSWR('https://next-js-course-53344-default-rtdb.firebaseio.com/sales.json', url => fetch(url).then(res => res.json()));
@@ -17,7 +21,7 @@ const LastSalesPage: NextPage = () => {
   useEffect(() => {
     if (!data) return;
 
-    const sales: sales[] = [];
+    const sales: Sale[] = [];
     for (const key in data) {
       sales.push({ id: key, ...data[key] })
     }
@@ -31,7 +35,7 @@ const LastSalesPage: NextPage = () => {
   //     .then(value => value.json())
   //     .then(data => {
   //
-  //       const sales: sales[] = [];
+  //       const sales: Sale[] = [];
   //       for (const key in data) {
   //         sales.push({ id: key, ...data[key] })
   //       }
@@ -59,3 +63,20 @@ const LastSalesPage: NextPage = () => {
 }
 
 export default LastSalesPage;
+
+export const getStaticProps: GetStaticProps<LastSalesPageProps> = async (context) => {
+  const response = await fetch('https://next-js-course-53344-default-rtdb.firebaseio.com/sales.json');
+  const data = await response.json();
+
+  const sales: Sale[] = [];
+  for (const key in data) {
+    sales.push({ id: key, ...data[key] })
+  }
+
+  return {
+    props: {
+      sales: sales,
+    },
+    revalidate: 10
+  };
+}
